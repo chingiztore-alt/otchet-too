@@ -293,6 +293,71 @@
     object-fit:cover;
     display:block;
   }
+  .screenshot-block{margin:16px 28px 0;}
+  .dropzone.screenshot-dropzone{
+    aspect-ratio:auto;
+    min-height:100px;
+  }
+  .dropzone.screenshot-dropzone img{
+    width:100%;
+    height:auto;
+    object-fit:contain;
+    display:block;
+  }
+  .dropzone.gallery-dropzone{
+    aspect-ratio:auto;
+    min-height:90px;
+    flex-wrap:wrap;
+    align-content:flex-start;
+    justify-content:flex-start;
+    padding:8px;
+    gap:6px;
+  }
+  .gallery{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    width:100%;
+  }
+  .gallery:empty{display:none;}
+  .thumb{
+    position:relative;
+    width:64px;
+    height:48px;
+    flex:none;
+    border-radius:6px;
+    overflow:hidden;
+    border:1px solid #D7E0E9;
+  }
+  .thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+  .thumb-remove{
+    position:absolute;
+    top:2px;right:2px;
+    width:16px;height:16px;
+    padding:0;
+    border-radius:50%;
+    background:rgba(27,39,51,.65);
+    color:#fff;
+    font-size:9px;
+    line-height:1;
+    border:none;
+  }
+  .thumb-remove:hover{background:rgba(27,39,51,.85);}
+  .add-tile{
+    width:64px;height:48px;
+    flex:none;
+    border:1.5px dashed #B9C6D2;
+    border-radius:6px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:20px;
+    line-height:1;
+    color:#8DA0B2;
+    background:#fff;
+  }
+  .paper.exporting .thumb-remove,.paper.exporting .add-tile{display:none;}
+  .print-photo-page{display:none;}
   .hint{
     display:flex;
     flex-direction:column;
@@ -335,19 +400,48 @@
     .field-row{flex-direction:column;}
     .field-label{flex:none;border-right:none;border-bottom:1px solid #E1E8EF;}
     .photos-grid{grid-template-columns:1fr;}
-    .paper-header,.legend,.fields,.section-title,.photos-grid,.paper-footer{
+    .paper-header,.legend,.fields,.section-title,.photos-grid,.paper-footer,.screenshot-block{
       margin-left:16px;margin-right:16px;
     }
   }
 
   @media print{
     body{background:#fff;padding-inline:0;}
-    .topbar,.tip-banner{display:none;}
+    .topbar,.tip-banner,.legend{display:none;}
+    #screenshotSectionTitle,#screenshotBlockWrap{display:none;}
+    #photosSectionTitle,.photos-grid{display:none;}
     .wrap{max-width:none;margin:0;padding-bottom:0;}
     .paper{box-shadow:none;border-radius:0;}
-    .field-row,.photo-slot{break-inside:avoid;}
+    .field-row,.photo-slot,.screenshot-block{break-inside:avoid;}
     .section-title{break-after:avoid;}
     .dropzone{break-inside:avoid;}
+    #printPhotoPages{display:block;}
+    .print-photo-page{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      page-break-before:always;
+      break-before:page;
+      page-break-inside:avoid;
+      break-inside:avoid;
+      width:100%;
+      box-sizing:border-box;
+      padding:10px 10px 0;
+    }
+    .print-photo-page img{
+      display:block;
+      max-width:100%;
+      max-height:78vh;
+      object-fit:contain;
+    }
+    .print-photo-caption{
+      font-size:13px;
+      font-weight:600;
+      color:#1B2733;
+      margin-bottom:14px;
+      text-align:center;
+    }
   }
 </style>
 </head>
@@ -374,7 +468,19 @@
       <p class="subtitle">Заполняется инженером после выполнения работ на объекте</p>
     </div>
 
-    <p class="legend">Нажмите на поле и впишите данные. Серый текст — только пример формата: он не попадёт в печать, пока вы не введёте своё значение. Фото — перетащите файл мышкой в рамку или нажмите на неё, чтобы выбрать файл; фото автоматически обрежется точно по размеру рамки. Кнопка «Печать / Сохранить PDF» открывает обычный диалог печати браузера — в нём выберите принтер «Сохранить как PDF» (на телефоне/планшете: значок «Поделиться» → «Печать» → раздвиньте превью пальцами → «Поделиться»/«Сохранить в Файлы»).</p>
+    <p class="legend">Нажмите на поле и впишите данные — либо вставьте скриншот с данными объекта ниже, и поля попробуют заполниться сами (распознавание текста, первый раз может занять до минуты — дальше быстрее). Серый текст — только пример формата: он не попадёт в печать, пока вы не введёте своё значение. Фото — перетащите файл мышкой в рамку или нажмите на неё, чтобы выбрать файл; фото автоматически обрежется точно по размеру рамки. Кнопка «Печать / Сохранить PDF» открывает обычный диалог печати браузера — в нём выберите принтер «Сохранить как PDF» (на телефоне/планшете: значок «Поделиться» → «Печать» → раздвиньте превью пальцами → «Поделиться»/«Сохранить в Файлы»).</p>
+
+    <div class="section-title" id="screenshotSectionTitle">Данные объекта — скриншот (необязательно)</div>
+    <div class="screenshot-block" id="screenshotBlockWrap">
+      <div class="dropzone screenshot-dropzone" id="screenshotZone" tabindex="0" role="button" aria-label="Добавить скриншот с данными объекта">
+        <div class="hint">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 16V4M12 4l-4 4M12 4l4 4"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+          <span>Нажмите сюда и вставьте скриншот (Ctrl+V) — или перетащите файл / нажмите, чтобы выбрать.<br>Данные из скриншота распознаются и заполнят поля ниже автоматически — проверьте их перед печатью. Сам скриншот в печать/PDF не попадает, только заполненные поля.</span>
+        </div>
+        <button type="button" class="clear-btn" hidden aria-label="Удалить скриншот">✕</button>
+        <input type="file" accept="image/*" hidden>
+      </div>
+    </div>
 
     <div class="fields">
       <div class="field-row">
@@ -382,11 +488,11 @@
         <div class="field-value" id="f-project" contenteditable="true" data-placeholder="Коммерческие услуги"></div>
       </div>
       <div class="field-row">
-        <div class="field-label">Компания-поставщик</div>
+        <div class="field-label">Компания Поставщик</div>
         <div class="field-value" id="f-vendor" contenteditable="true" data-placeholder="ТОО «QazMedTech Expert»"></div>
       </div>
       <div class="field-row">
-        <div class="field-label">ЛПУ (наименование, регион)</div>
+        <div class="field-label">ЛПУ</div>
         <div class="field-value" id="f-facility" data-field="object" contenteditable="true" data-placeholder="КГП на ПХВ «Атырауский областной центр фтизиопульмонологии»"></div>
       </div>
       <div class="field-row">
@@ -398,16 +504,12 @@
         <div class="field-value" id="f-serial" contenteditable="true" data-placeholder="—"></div>
       </div>
       <div class="field-row">
-        <div class="field-label">Договор №</div>
+        <div class="field-label">Договор</div>
         <div class="field-value" id="f-contract" contenteditable="true" data-placeholder="№940840000806/260079/00 от 13.03.2026"></div>
       </div>
       <div class="field-row">
-        <div class="field-label">Срок поставки/исполнения (с)</div>
-        <div class="field-value" id="f-date-from" contenteditable="true" data-placeholder="01.09.2026"></div>
-      </div>
-      <div class="field-row">
-        <div class="field-label">Срок поставки/исполнения (по)</div>
-        <div class="field-value" id="f-date-to" contenteditable="true" data-placeholder="01.09.2026"></div>
+        <div class="field-label">Срок поставки/исполнения</div>
+        <div class="field-value" id="f-term" contenteditable="true" data-placeholder="от 01.09.2026 по 01.09.2026 (1 день)"></div>
       </div>
       <div class="field-row">
         <div class="field-label">Контактное лицо (ЛПУ)</div>
@@ -417,63 +519,58 @@
         <div class="field-label">Наименование работ</div>
         <div class="field-value" id="f-work" contenteditable="true" data-placeholder="ПТО"></div>
       </div>
-      <div class="field-row">
-        <div class="field-label">Дата фактического выполнения</div>
-        <div class="field-value" id="f-date-done" contenteditable="true" data-placeholder="дд.мм.гггг"></div>
+    </div>
+
+    <div class="section-title" id="photosSectionTitle">Фотоотчёт</div>
+    <p class="legend photo-legend">Можно добавить сколько угодно фото в каждый раздел — перетащите сразу несколько файлов или нажмите и выберите несколько. В печати/PDF каждое фото автоматически займёт отдельный лист целиком.</p>
+    <div class="photos-grid">
+      <div class="photo-slot" data-cat="Запчасти ДО ремонта">
+        <div class="ph-label">1. Запчасти ДО ремонта</div>
+        <div class="dropzone gallery-dropzone" tabindex="0" role="button" aria-label="Добавить фото: запчасти до ремонта">
+          <div class="hint">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 16V4M12 4l-4 4M12 4l4 4"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+            <span>Перетащите фото сюда (можно несколько)<br>или нажмите, чтобы выбрать</span>
+          </div>
+          <div class="gallery"></div>
+          <input type="file" accept="image/*" multiple hidden>
+        </div>
       </div>
-      <div class="field-row">
-        <div class="field-label">Инженер (ФИО)</div>
-        <div class="field-value" id="f-engineer" contenteditable="true" data-placeholder="Иванов Иван Иванович"></div>
+      <div class="photo-slot" data-cat="ЗАМЕНЁННЫЕ запчасти">
+        <div class="ph-label">2. ЗАМЕНЁННЫЕ запчасти</div>
+        <div class="dropzone gallery-dropzone" tabindex="0" role="button" aria-label="Добавить фото: заменённые запчасти">
+          <div class="hint">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 16V4M12 4l-4 4M12 4l4 4"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+            <span>Перетащите фото сюда (можно несколько)<br>или нажмите, чтобы выбрать</span>
+          </div>
+          <div class="gallery"></div>
+          <input type="file" accept="image/*" multiple hidden>
+        </div>
+      </div>
+      <div class="photo-slot" data-cat="Аппарат ДО обслуживания (пыль/загрязнение)">
+        <div class="ph-label">3. Аппарат ДО обслуживания (пыль/загрязнение)</div>
+        <div class="dropzone gallery-dropzone" tabindex="0" role="button" aria-label="Добавить фото: аппарат до обслуживания">
+          <div class="hint">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 16V4M12 4l-4 4M12 4l4 4"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+            <span>Перетащите фото сюда (можно несколько)<br>или нажмите, чтобы выбрать</span>
+          </div>
+          <div class="gallery"></div>
+          <input type="file" accept="image/*" multiple hidden>
+        </div>
+      </div>
+      <div class="photo-slot" data-cat="Аппарат ПОСЛЕ обслуживания">
+        <div class="ph-label">4. Аппарат ПОСЛЕ обслуживания</div>
+        <div class="dropzone gallery-dropzone" tabindex="0" role="button" aria-label="Добавить фото: аппарат после обслуживания">
+          <div class="hint">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 16V4M12 4l-4 4M12 4l4 4"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+            <span>Перетащите фото сюда (можно несколько)<br>или нажмите, чтобы выбрать</span>
+          </div>
+          <div class="gallery"></div>
+          <input type="file" accept="image/*" multiple hidden>
+        </div>
       </div>
     </div>
 
-    <div class="section-title">Фотоотчёт (4 фото)</div>
-    <div class="photos-grid">
-      <div class="photo-slot">
-        <div class="ph-label">1. Запчасти ДО ремонта</div>
-        <div class="dropzone" tabindex="0" role="button" aria-label="Добавить фото: запчасти до ремонта">
-          <div class="hint">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 16V4M12 4l-4 4M12 4l4 4"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
-            <span>Перетащите фото сюда<br>или нажмите, чтобы выбрать</span>
-          </div>
-          <button type="button" class="clear-btn" hidden aria-label="Удалить фото">✕</button>
-          <input type="file" accept="image/*" hidden>
-        </div>
-      </div>
-      <div class="photo-slot">
-        <div class="ph-label">2. ЗАМЕНЁННЫЕ запчасти</div>
-        <div class="dropzone" tabindex="0" role="button" aria-label="Добавить фото: заменённые запчасти">
-          <div class="hint">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 16V4M12 4l-4 4M12 4l4 4"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
-            <span>Перетащите фото сюда<br>или нажмите, чтобы выбрать</span>
-          </div>
-          <button type="button" class="clear-btn" hidden aria-label="Удалить фото">✕</button>
-          <input type="file" accept="image/*" hidden>
-        </div>
-      </div>
-      <div class="photo-slot">
-        <div class="ph-label">3. Аппарат ДО обслуживания (пыль/загрязнение)</div>
-        <div class="dropzone" tabindex="0" role="button" aria-label="Добавить фото: аппарат до обслуживания">
-          <div class="hint">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 16V4M12 4l-4 4M12 4l4 4"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
-            <span>Перетащите фото сюда<br>или нажмите, чтобы выбрать</span>
-          </div>
-          <button type="button" class="clear-btn" hidden aria-label="Удалить фото">✕</button>
-          <input type="file" accept="image/*" hidden>
-        </div>
-      </div>
-      <div class="photo-slot">
-        <div class="ph-label">4. Аппарат ПОСЛЕ обслуживания</div>
-        <div class="dropzone" tabindex="0" role="button" aria-label="Добавить фото: аппарат после обслуживания">
-          <div class="hint">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 16V4M12 4l-4 4M12 4l4 4"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
-            <span>Перетащите фото сюда<br>или нажмите, чтобы выбрать</span>
-          </div>
-          <button type="button" class="clear-btn" hidden aria-label="Удалить фото">✕</button>
-          <input type="file" accept="image/*" hidden>
-        </div>
-      </div>
-    </div>
+    <div id="printPhotoPages"></div>
 
     <p class="paper-footer">Отчёт сформирован в PDF из этой формы. Один файл — один объект/ремонт.</p>
   </div>
@@ -514,7 +611,112 @@
     return canvas;
   }
 
-  function wireSlot(slot){
+  function fitContain(img, maxDim){
+    var w = img.naturalWidth, h = img.naturalHeight;
+    var scale = Math.min(1, maxDim / Math.max(w, h));
+    var canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(w * scale));
+    canvas.height = Math.max(1, Math.round(h * scale));
+    var ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    return canvas;
+  }
+
+  // ---- Text recognition (OCR) for the screenshot block: reads plain text off the
+  // pasted screenshot in the browser (no server, no account) and auto-fills the
+  // matching fields below it. ----
+  var tesseractPromise = null;
+  function loadTesseract(){
+    if (window.Tesseract) return Promise.resolve(window.Tesseract);
+    if (tesseractPromise) return tesseractPromise;
+    tesseractPromise = new Promise(function(resolve, reject){
+      var s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+      s.onload = function(){ resolve(window.Tesseract); };
+      s.onerror = function(){ reject(new Error('tesseract load failed')); };
+      document.head.appendChild(s);
+    });
+    return tesseractPromise;
+  }
+
+  var FIELD_LABELS = [
+    {id:'f-project',    pat:'проект'},
+    {id:'f-vendor',     pat:'компания\\s*-?\\s*поставщик'},
+    {id:'f-facility',   pat:'лпу'},
+    {id:'f-equip',      pat:'мт\\s*и\\s*количество'},
+    {id:'f-serial',     pat:'серийный\\s*номер'},
+    {id:'f-contract',   pat:'договор'},
+    {id:'f-term',       pat:'срок\\s*поставки'},
+    {id:'f-contact',    pat:'контактное\\s*лицо'},
+    {id:'f-work',       pat:'наименование\\s*работ'}
+  ];
+
+  function extractFields(text){
+    var norm = String(text || '').replace(/\r/g, '');
+    var allPatterns = FIELD_LABELS.map(function(l){ return l.pat; }).join('|');
+    var labelRe = new RegExp('(' + allPatterns + ')[^\\n:]*[:\\-–]+[ \\t]*', 'gi');
+    var hits = [];
+    var m;
+    while ((m = labelRe.exec(norm))){
+      hits.push({start: m.index, end: labelRe.lastIndex, label: m[1].toLowerCase()});
+    }
+    var out = {};
+    for (var i = 0; i < hits.length; i++){
+      var start = hits[i].end;
+      var end = (i + 1 < hits.length) ? hits[i + 1].start : norm.length;
+      var value = norm.slice(start, end).trim().replace(/\s*\n\s*/g, ' ').replace(/^[:,\s]+/, '').replace(/[,\s]+$/, '').trim();
+      if (!value) continue;
+      for (var j = 0; j < FIELD_LABELS.length; j++){
+        if (new RegExp('^(' + FIELD_LABELS[j].pat + ')$', 'i').test(hits[i].label)){
+          out[FIELD_LABELS[j].id] = value;
+          break;
+        }
+      }
+    }
+    return out;
+  }
+
+  function parseAndFill(text){
+    var extracted = extractFields(text);
+    var filled = 0;
+    function setField(id, value){
+      if (!value || value === '-' || value === '—') return;
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = value;
+      filled++;
+    }
+    setField('f-project', extracted['f-project']);
+    setField('f-vendor', extracted['f-vendor']);
+    setField('f-facility', extracted['f-facility']);
+    setField('f-equip', extracted['f-equip']);
+    setField('f-serial', extracted['f-serial']);
+    setField('f-contract', extracted['f-contract']);
+    setField('f-term', extracted['f-term']);
+    setField('f-contact', extracted['f-contact']);
+    setField('f-work', extracted['f-work']);
+    return filled;
+  }
+
+  function recognizeScreenshot(canvasEl){
+    setStatus('Распознаём текст на скриншоте… первый раз может занять до минуты.');
+    loadTesseract().then(function(Tesseract){
+      return Tesseract.recognize(canvasEl, 'rus+eng');
+    }).then(function(result){
+      var text = result && result.data && result.data.text;
+      var filled = parseAndFill(text);
+      if (filled > 0){
+        setStatus('Автозаполнено полей: ' + filled + '. Проверьте их перед печатью.', 7000);
+      } else {
+        setStatus('Не удалось распознать данные на скриншоте — заполните поля вручную.', 7000);
+      }
+    }).catch(function(err){
+      console.error(err);
+      setStatus('Не удалось распознать текст (нет интернета или сбой загрузки). Заполните поля вручную.', 7000);
+    });
+  }
+
+  function wireSlot(slot, isScreenshot){
     var zone = slot.querySelector('.dropzone');
     var input = slot.querySelector('input[type=file]');
     var clearBtn = slot.querySelector('.clear-btn');
@@ -545,6 +747,10 @@
       if (file) handleFile(file);
       input.value = '';
     });
+    zone.addEventListener('paste', function(e){
+      var file = fileFromClipboard(e);
+      if (file){ e.preventDefault(); handleFile(file); }
+    });
     clearBtn.addEventListener('click', function(e){
       e.stopPropagation();
       var img = zone.querySelector('img');
@@ -563,19 +769,20 @@
       var url = URL.createObjectURL(file);
       var im = new Image();
       im.onload = function(){
-        var c = cropCover(im, 900, 675);
+        var c = isScreenshot ? fitContain(im, 1400) : cropCover(im, 900, 675);
         URL.revokeObjectURL(url);
         var img = zone.querySelector('img');
         if (!img){
           img = document.createElement('img');
           zone.insertBefore(img, clearBtn);
         }
-        img.src = c.toDataURL('image/jpeg', 0.85);
+        img.src = c.toDataURL('image/jpeg', isScreenshot ? 0.92 : 0.85);
         img.alt = '';
         zone.classList.add('has-image');
         hint.hidden = true;
         hint.style.display = 'none';
         clearBtn.hidden = false;
+        if (isScreenshot) recognizeScreenshot(c);
       };
       im.onerror = function(){
         URL.revokeObjectURL(url);
@@ -583,9 +790,174 @@
       };
       im.src = url;
     }
+    zone._handleFile = handleFile;
   }
 
-  Array.prototype.forEach.call(document.querySelectorAll('.photo-slot'), wireSlot);
+  function fileFromClipboard(e){
+    var items = e.clipboardData && e.clipboardData.items;
+    if (!items) return null;
+    for (var i = 0; i < items.length; i++){
+      if (items[i].type && items[i].type.indexOf('image/') === 0){
+        return items[i].getAsFile();
+      }
+    }
+    return null;
+  }
+
+  // ---- Photo categories: each one can hold any number of photos. On screen they
+  // show as small thumbnails; for print, every single photo gets its own full page
+  // (built into #printPhotoPages) so nothing is cropped or squeezed. ----
+  var photosByCategory = {};
+  var CATEGORY_ORDER = [
+    'Запчасти ДО ремонта',
+    'ЗАМЕНЁННЫЕ запчасти',
+    'Аппарат ДО обслуживания (пыль/загрязнение)',
+    'Аппарат ПОСЛЕ обслуживания'
+  ];
+
+  function addPhotoToCategory(cat, file, slot){
+    if (!file.type || file.type.indexOf('image/') !== 0){
+      setStatus('Пропущен файл (это не изображение): ' + (file.name || ''), 5000);
+      return;
+    }
+    var url = URL.createObjectURL(file);
+    var im = new Image();
+    im.onload = function(){
+      URL.revokeObjectURL(url);
+      var thumb = cropCover(im, 200, 150).toDataURL('image/jpeg', 0.8);
+      var full = fitContain(im, 1600).toDataURL('image/jpeg', 0.9);
+      (photosByCategory[cat] = photosByCategory[cat] || []).push({thumb: thumb, full: full});
+      renderGallery(slot, cat);
+      rebuildPrintPages();
+    };
+    im.onerror = function(){
+      URL.revokeObjectURL(url);
+      setStatus('Не удалось открыть изображение: ' + (file.name || ''), 5000);
+    };
+    im.src = url;
+  }
+
+  function removePhoto(cat, index, slot){
+    var arr = photosByCategory[cat];
+    if (!arr) return;
+    arr.splice(index, 1);
+    if (arr.length === 0) delete photosByCategory[cat];
+    renderGallery(slot, cat);
+    rebuildPrintPages();
+  }
+
+  function renderGallery(slot, cat){
+    var zone = slot.querySelector('.dropzone');
+    var hint = slot.querySelector('.hint');
+    var galleryEl = slot.querySelector('.gallery');
+    var arr = photosByCategory[cat] || [];
+    galleryEl.innerHTML = '';
+    arr.forEach(function(photo, idx){
+      var thumb = document.createElement('div');
+      thumb.className = 'thumb';
+      var img = document.createElement('img');
+      img.src = photo.thumb;
+      img.alt = '';
+      var rm = document.createElement('button');
+      rm.type = 'button';
+      rm.className = 'thumb-remove';
+      rm.setAttribute('aria-label', 'Удалить фото');
+      rm.textContent = '✕';
+      rm.addEventListener('click', function(e){
+        e.stopPropagation();
+        removePhoto(cat, idx, slot);
+      });
+      thumb.appendChild(img);
+      thumb.appendChild(rm);
+      galleryEl.appendChild(thumb);
+    });
+    if (arr.length > 0){
+      var addTile = document.createElement('div');
+      addTile.className = 'add-tile';
+      addTile.textContent = '+';
+      galleryEl.appendChild(addTile);
+      hint.hidden = true;
+      hint.style.display = 'none';
+      zone.classList.add('has-image');
+    } else {
+      hint.hidden = false;
+      hint.style.display = '';
+      zone.classList.remove('has-image');
+    }
+  }
+
+  function rebuildPrintPages(){
+    var container = document.getElementById('printPhotoPages');
+    if (!container) return;
+    container.innerHTML = '';
+    CATEGORY_ORDER.forEach(function(cat){
+      var arr = photosByCategory[cat] || [];
+      arr.forEach(function(photo, idx){
+        var page = document.createElement('div');
+        page.className = 'print-photo-page';
+        var cap = document.createElement('div');
+        cap.className = 'print-photo-caption';
+        cap.textContent = cat + (arr.length > 1 ? (' — фото ' + (idx + 1) + ' из ' + arr.length) : '');
+        var img = document.createElement('img');
+        img.src = photo.full;
+        img.alt = '';
+        page.appendChild(cap);
+        page.appendChild(img);
+        container.appendChild(page);
+      });
+    });
+  }
+
+  function wireGallery(slot){
+    var cat = slot.getAttribute('data-cat');
+    var zone = slot.querySelector('.dropzone');
+    var input = slot.querySelector('input[type=file]');
+
+    function openPicker(){ input.click(); }
+
+    zone.addEventListener('click', function(e){
+      if (e.target.closest && e.target.closest('.thumb')) return;
+      openPicker();
+    });
+    zone.addEventListener('keydown', function(e){
+      if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openPicker(); }
+    });
+    ['dragenter','dragover'].forEach(function(ev){
+      zone.addEventListener(ev, function(e){ e.preventDefault(); e.stopPropagation(); zone.classList.add('dragover'); });
+    });
+    ['dragleave','dragend'].forEach(function(ev){
+      zone.addEventListener(ev, function(e){ e.preventDefault(); zone.classList.remove('dragover'); });
+    });
+    zone.addEventListener('drop', function(e){
+      e.preventDefault(); e.stopPropagation();
+      zone.classList.remove('dragover');
+      var files = e.dataTransfer && e.dataTransfer.files;
+      if (files) Array.prototype.forEach.call(files, function(f){ addPhotoToCategory(cat, f, slot); });
+    });
+    input.addEventListener('change', function(e){
+      var files = e.target.files;
+      if (files) Array.prototype.forEach.call(files, function(f){ addPhotoToCategory(cat, f, slot); });
+      input.value = '';
+    });
+    zone.addEventListener('paste', function(e){
+      var file = fileFromClipboard(e);
+      if (file){ e.preventDefault(); addPhotoToCategory(cat, file, slot); }
+    });
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('.photo-slot'), wireGallery);
+  var screenshotZone = document.getElementById('screenshotZone');
+  if (screenshotZone) wireSlot(screenshotZone.closest('.screenshot-block'), true);
+
+  // Global fallback: Ctrl+V anywhere on the page (without a dropzone focused)
+  // fills the screenshot slot, so an engineer can just copy a screenshot and paste.
+  document.addEventListener('paste', function(e){
+    var active = document.activeElement;
+    if (active && active.classList && active.classList.contains('dropzone')) return; // handled by the zone itself
+    if (!screenshotZone || screenshotZone.classList.contains('has-image')) return;
+    var file = fileFromClipboard(e);
+    if (file && screenshotZone._handleFile){ e.preventDefault(); screenshotZone._handleFile(file); }
+  });
 
   var statusEl = document.getElementById('status');
   var statusTimer = null;
@@ -600,15 +972,24 @@
   document.getElementById('clearBtn').addEventListener('click', function(){
     if (!window.confirm('Очистить все поля и фото?')) return;
     Array.prototype.forEach.call(document.querySelectorAll('.field-value'), function(el){ el.textContent = ''; });
-    Array.prototype.forEach.call(document.querySelectorAll('.dropzone.has-image'), function(zone){
-      var img = zone.querySelector('img');
-      if (img) img.remove();
-      zone.classList.remove('has-image');
-      var h = zone.querySelector('.hint');
-      h.hidden = false;
-      h.style.display = '';
-      zone.querySelector('.clear-btn').hidden = true;
+
+    if (screenshotZone && screenshotZone.classList.contains('has-image')){
+      var simg = screenshotZone.querySelector('img');
+      if (simg) simg.remove();
+      screenshotZone.classList.remove('has-image');
+      var sHint = screenshotZone.querySelector('.hint');
+      sHint.hidden = false;
+      sHint.style.display = '';
+      var sClear = screenshotZone.querySelector('.clear-btn');
+      if (sClear) sClear.hidden = true;
+    }
+
+    photosByCategory = {};
+    Array.prototype.forEach.call(document.querySelectorAll('.photo-slot'), function(slot){
+      renderGallery(slot, slot.getAttribute('data-cat'));
     });
+    rebuildPrintPages();
+
     setStatus('Форма очищена', 2500);
   });
 
