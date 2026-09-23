@@ -255,7 +255,7 @@
     display:flex;
     gap:28px;
   }
-  .sign-cell{flex:1;min-width:0;}
+  .sign-cell{flex:1;min-width:0;max-width:320px;}
   .sign-line{
     border-bottom:1px solid #8DA0B2;
     height:32px;
@@ -481,6 +481,7 @@
       margin-left:16px;margin-right:16px;
     }
     .sign-row{flex-direction:column;gap:18px;}
+    .sign-cell{max-width:none;}
   }
 
   @page{
@@ -643,10 +644,6 @@
 
     <div class="sign-block">
       <div class="sign-row">
-        <div class="sign-cell">
-          <div class="sign-line"></div>
-          <div class="sign-caption">Инженер — Ф.И.О., подпись</div>
-        </div>
         <div class="sign-cell">
           <div class="sign-line"></div>
           <div class="sign-caption">Представитель ЛПУ — Ф.И.О., подпись</div>
