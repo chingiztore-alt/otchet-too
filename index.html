@@ -12,7 +12,7 @@
 <meta name="apple-mobile-web-app-title" content="Отчёт ТО">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#1F4E79">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Caladea:ital,wght@0,400;0,700;1,400;1,700&display=swap">
 <style>
   :root{
     --bg:#EEF2F6;
@@ -167,7 +167,7 @@
     border-radius:10px;
     box-shadow:var(--shadow);
     overflow:hidden;
-    font-family:"Cambria", "Times New Roman", Times, "PT Serif", Georgia, serif;
+    font-family:"Cambria", "Caladea", "Times New Roman", Times, "PT Serif", Georgia, serif;
   }
   .paper-header{
     background:#FFFFFF;
@@ -259,7 +259,7 @@
     font-weight:700;
     letter-spacing:.03em;
     text-transform:uppercase;
-    font-family:"Cambria", "Times New Roman", Times, serif;
+    font-family:"Cambria", "Caladea", "Times New Roman", Times, serif;
   }
   .photos-grid{
     margin:0 32px 26px;
@@ -316,12 +316,19 @@
   }
   .dropzone.gallery-dropzone{
     aspect-ratio:auto;
-    min-height:90px;
+    min-height:150px;
     flex-wrap:wrap;
     align-content:flex-start;
     justify-content:flex-start;
     padding:8px;
     gap:6px;
+  }
+  .dropzone.gallery-dropzone:not(.has-image){
+    align-content:center;
+    justify-content:center;
+  }
+  .dropzone.gallery-dropzone:not(.has-image) .hint{
+    width:100%;
   }
   .gallery{
     display:flex;
@@ -449,7 +456,7 @@
       object-fit:contain;
     }
     .print-photo-caption{
-      font-family:"Cambria", "Times New Roman", Times, serif;
+      font-family:"Cambria", "Caladea", "Times New Roman", Times, serif;
       font-size:14px;
       font-weight:700;
       color:#1B2733;
@@ -484,7 +491,7 @@
 
     <p class="legend">Нажмите на поле и впишите данные — либо вставьте скриншот с данными объекта ниже, и поля попробуют заполниться сами (распознавание текста, первый раз может занять до минуты — дальше быстрее). Серый текст — только пример формата: он не попадёт в печать, пока вы не введёте своё значение. Фото — перетащите файл мышкой в рамку или нажмите на неё, чтобы выбрать файл; фото автоматически обрежется точно по размеру рамки. Кнопка «Печать / Сохранить PDF» открывает обычный диалог печати браузера — в нём выберите принтер «Сохранить как PDF» (на телефоне/планшете: значок «Поделиться» → «Печать» → раздвиньте превью пальцами → «Поделиться»/«Сохранить в Файлы»).</p>
 
-    <div class="section-title" id="screenshotSectionTitle">Данные объекта — скриншот (необязательно)</div>
+    <div class="section-title" id="screenshotSectionTitle">Данные объекта — скриншот</div>
     <div class="screenshot-block" id="screenshotBlockWrap">
       <div class="dropzone screenshot-dropzone" id="screenshotZone" tabindex="0" role="button" aria-label="Добавить скриншот с данными объекта">
         <div class="hint">
