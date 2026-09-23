@@ -172,13 +172,13 @@
   .paper-header{
     background:#1F4E79;
     color:#FFFFFF;
-    padding:28px 32px 20px;
+    padding:36px 36px 28px;
     text-align:center;
     border-bottom:none;
   }
   .paper-header h1{
-    margin:0 0 8px;
-    font-size:21px;
+    margin:0 0 10px;
+    font-size:23px;
     font-weight:700;
     letter-spacing:.02em;
     text-transform:uppercase;
@@ -187,13 +187,13 @@
   }
   .paper-header .subtitle{
     margin:0;
-    font-size:13px;
+    font-size:13.5px;
     font-style:italic;
     color:#FFFFFF;
     opacity:.85;
   }
   .legend{
-    margin:14px 32px 0;
+    margin:16px 32px 0;
     padding:10px 12px;
     background:#F4F7FA;
     border:1px solid #E1E8EF;
@@ -205,7 +205,7 @@
     font-family:"IBM Plex Sans","Segoe UI",Arial,sans-serif;
   }
   .fields{
-    margin:20px 32px 0;
+    margin:28px 32px 0;
     border:1px solid #1F4E79;
     border-radius:0;
     overflow:hidden;
@@ -217,8 +217,8 @@
   .field-row:last-child{border-bottom:none;}
   .field-label{
     flex:0 0 42%;
-    padding:9px 14px;
-    font-size:13.5px;
+    padding:15px 18px;
+    font-size:14.5px;
     font-weight:700;
     background:#EAF1F8;
     border-right:1px solid #1F4E79;
@@ -227,8 +227,8 @@
   }
   .field-value{
     flex:1;
-    padding:9px 14px;
-    font-size:13.5px;
+    padding:15px 18px;
+    font-size:14.5px;
     background:#FEFDF9;
     outline:none;
     min-width:0;
@@ -247,6 +247,39 @@
     font-family:inherit;
   }
   .paper.exporting .field-value:empty::before{ content:""; }
+
+  .sign-block{
+    margin:34px 32px 4px;
+  }
+  .sign-row{
+    display:flex;
+    gap:28px;
+  }
+  .sign-cell{flex:1;min-width:0;}
+  .sign-line{
+    border-bottom:1px solid #8DA0B2;
+    height:32px;
+  }
+  .sign-caption{
+    margin-top:6px;
+    font-size:10.5px;
+    color:#5B6B7A;
+    text-align:center;
+    font-family:"IBM Plex Sans","Segoe UI",Arial,sans-serif;
+  }
+  .sign-date{
+    margin-top:24px;
+    font-size:11.5px;
+    color:#3A4856;
+    font-family:"IBM Plex Sans","Segoe UI",Arial,sans-serif;
+  }
+  .sign-date-line{
+    display:inline-block;
+    width:150px;
+    border-bottom:1px solid #8DA0B2;
+    margin-left:8px;
+    vertical-align:bottom;
+  }
 
   .section-title{
     margin:26px 32px 12px;
@@ -444,9 +477,10 @@
     .field-row{flex-direction:column;}
     .field-label{flex:none;border-right:none;border-bottom:1px solid #E1E8EF;}
     .photos-grid{grid-template-columns:1fr;}
-    .paper-header,.legend,.fields,.section-title,.photos-grid,.paper-footer,.screenshot-block{
+    .paper-header,.legend,.fields,.sign-block,.section-title,.photos-grid,.paper-footer,.screenshot-block{
       margin-left:16px;margin-right:16px;
     }
+    .sign-row{flex-direction:column;gap:18px;}
   }
 
   @page{
@@ -454,6 +488,17 @@
     margin:0;
   }
   @media print{
+    /* Force colors/backgrounds to print regardless of the device's own
+       "background graphics" print setting (many phones and some desktop
+       print dialogs default this OFF, which silently drops the navy header
+       background and every field/label tint, leaving near-invisible white
+       text on a white page). Modern browsers honor this and print colors
+       unconditionally once it's set. */
+    *{
+      -webkit-print-color-adjust:exact !important;
+      print-color-adjust:exact !important;
+      color-adjust:exact !important;
+    }
     /* Force one specific, always-available web font for the exported document
        itself (not the on-screen editing view). Cambria only exists on Windows,
        so a phone and a Windows PC would otherwise render two different fonts
@@ -471,7 +516,7 @@
     .paper-footer{display:none;}
     .wrap{max-width:none;margin:0;padding-bottom:0;}
     .paper{box-shadow:none;border-radius:0;}
-    .field-row,.photo-slot,.screenshot-block{break-inside:avoid;}
+    .field-row,.photo-slot,.screenshot-block,.sign-block{break-inside:avoid;}
     .section-title{break-after:avoid;}
     .dropzone{break-inside:avoid;}
     #printPhotoPages{display:block;}
@@ -487,20 +532,35 @@
       width:210mm;
       height:297mm;
       box-sizing:border-box;
-      padding:10mm 10mm 0;
-    }
-    .print-photo-page img{
-      display:block;
-      max-width:100%;
-      max-height:265mm;
-      object-fit:contain;
+      padding:16mm;
     }
     .print-photo-caption{
       font-size:14px;
       font-weight:700;
       color:#1B2733;
-      margin-bottom:8mm;
+      margin-bottom:9mm;
       text-align:center;
+    }
+    /* Photos/act pages sit inside a neat bordered "mount" — proper margins on
+       every side and a light frame, instead of the image bleeding to the
+       page edge — so it reads as a page of a document, not a raw photo. */
+    .print-photo-frame{
+      max-width:100%;
+      max-height:240mm;
+      box-sizing:border-box;
+      padding:7mm;
+      border:1px solid #D7E0E9;
+      background:#FFFFFF;
+      box-shadow:0 1px 4px rgba(27,39,51,.10);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .print-photo-frame img{
+      display:block;
+      max-width:100%;
+      max-height:226mm;
+      object-fit:contain;
     }
   }
 </style>
@@ -579,6 +639,20 @@
         <div class="field-label">Наименование работ</div>
         <div class="field-value" id="f-work" contenteditable="true" data-placeholder="ПТО"></div>
       </div>
+    </div>
+
+    <div class="sign-block">
+      <div class="sign-row">
+        <div class="sign-cell">
+          <div class="sign-line"></div>
+          <div class="sign-caption">Инженер — Ф.И.О., подпись</div>
+        </div>
+        <div class="sign-cell">
+          <div class="sign-line"></div>
+          <div class="sign-caption">Представитель ЛПУ — Ф.И.О., подпись</div>
+        </div>
+      </div>
+      <div class="sign-date">Дата <span class="sign-date-line"></span></div>
     </div>
 
     <div class="section-title" id="photosSectionTitle">Фотоотчёт</div>
@@ -1014,11 +1088,14 @@
         var cap = document.createElement('div');
         cap.className = 'print-photo-caption';
         cap.textContent = cat + (arr.length > 1 ? (' — фото ' + (idx + 1) + ' из ' + arr.length) : '');
+        var frame = document.createElement('div');
+        frame.className = 'print-photo-frame';
         var img = document.createElement('img');
         img.src = photo.full;
         img.alt = '';
+        frame.appendChild(img);
         page.appendChild(cap);
-        page.appendChild(img);
+        page.appendChild(frame);
         container.appendChild(page);
       });
     });
@@ -1028,11 +1105,14 @@
       var cap = document.createElement('div');
       cap.className = 'print-photo-caption';
       cap.textContent = 'Акт выполненных работ' + (actPages.length > 1 ? (' — страница ' + (idx + 1) + ' из ' + actPages.length) : '');
+      var frame = document.createElement('div');
+      frame.className = 'print-photo-frame';
       var img = document.createElement('img');
       img.src = pageDataUrl;
       img.alt = '';
+      frame.appendChild(img);
       page.appendChild(cap);
-      page.appendChild(img);
+      page.appendChild(frame);
       container.appendChild(page);
     });
   }
