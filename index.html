@@ -248,39 +248,6 @@
   }
   .paper.exporting .field-value:empty::before{ content:""; }
 
-  .sign-block{
-    margin:34px 32px 4px;
-  }
-  .sign-row{
-    display:flex;
-    gap:28px;
-  }
-  .sign-cell{flex:1;min-width:0;max-width:320px;}
-  .sign-line{
-    border-bottom:1px solid #8DA0B2;
-    height:32px;
-  }
-  .sign-caption{
-    margin-top:6px;
-    font-size:10.5px;
-    color:#5B6B7A;
-    text-align:center;
-    font-family:"IBM Plex Sans","Segoe UI",Arial,sans-serif;
-  }
-  .sign-date{
-    margin-top:24px;
-    font-size:11.5px;
-    color:#3A4856;
-    font-family:"IBM Plex Sans","Segoe UI",Arial,sans-serif;
-  }
-  .sign-date-line{
-    display:inline-block;
-    width:150px;
-    border-bottom:1px solid #8DA0B2;
-    margin-left:8px;
-    vertical-align:bottom;
-  }
-
   .section-title{
     margin:26px 32px 12px;
     padding:0 0 7px;
@@ -477,11 +444,9 @@
     .field-row{flex-direction:column;}
     .field-label{flex:none;border-right:none;border-bottom:1px solid #E1E8EF;}
     .photos-grid{grid-template-columns:1fr;}
-    .paper-header,.legend,.fields,.sign-block,.section-title,.photos-grid,.paper-footer,.screenshot-block{
+    .paper-header,.legend,.fields,.section-title,.photos-grid,.paper-footer,.screenshot-block{
       margin-left:16px;margin-right:16px;
     }
-    .sign-row{flex-direction:column;gap:18px;}
-    .sign-cell{max-width:none;}
   }
 
   @page{
@@ -517,7 +482,7 @@
     .paper-footer{display:none;}
     .wrap{max-width:none;margin:0;padding-bottom:0;}
     .paper{box-shadow:none;border-radius:0;}
-    .field-row,.photo-slot,.screenshot-block,.sign-block{break-inside:avoid;}
+    .field-row,.photo-slot,.screenshot-block{break-inside:avoid;}
     .section-title{break-after:avoid;}
     .dropzone{break-inside:avoid;}
     #printPhotoPages{display:block;}
@@ -640,16 +605,6 @@
         <div class="field-label">Наименование работ</div>
         <div class="field-value" id="f-work" contenteditable="true" data-placeholder="ПТО"></div>
       </div>
-    </div>
-
-    <div class="sign-block">
-      <div class="sign-row">
-        <div class="sign-cell">
-          <div class="sign-line"></div>
-          <div class="sign-caption">Представитель ЛПУ — Ф.И.О., подпись</div>
-        </div>
-      </div>
-      <div class="sign-date">Дата <span class="sign-date-line"></span></div>
     </div>
 
     <div class="section-title" id="photosSectionTitle">Фотоотчёт</div>
