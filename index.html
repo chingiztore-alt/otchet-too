@@ -314,6 +314,33 @@
     object-fit:contain;
     display:block;
   }
+  .pdf-block{margin:16px 32px 0;}
+  .dropzone.pdf-dropzone{
+    aspect-ratio:auto;
+    min-height:100px;
+  }
+  .pdf-file-info{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:14px 16px;
+    width:100%;
+  }
+  .pdf-icon{width:32px;height:32px;flex:none;color:#2E75B6;}
+  .pdf-file-text{min-width:0;}
+  .pdf-file-name{
+    font-size:13px;
+    font-weight:600;
+    color:#1B2733;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .pdf-file-pages{
+    font-size:11.5px;
+    color:#7A8A99;
+    margin-top:2px;
+  }
   .dropzone.gallery-dropzone{
     aspect-ratio:auto;
     min-height:150px;
@@ -430,6 +457,7 @@
     .topbar,.tip-banner,.legend{display:none;}
     #screenshotSectionTitle,#screenshotBlockWrap{display:none;}
     #photosSectionTitle,.photos-grid{display:none;}
+    #actSectionTitle,.pdf-block{display:none;}
     .wrap{max-width:none;margin:0;padding-bottom:0;}
     .paper{box-shadow:none;border-radius:0;}
     .field-row,.photo-slot,.screenshot-block{break-inside:avoid;}
@@ -602,6 +630,26 @@
       </div>
     </div>
 
+    <div class="section-title" id="actSectionTitle">Акт выполненных работ (PDF)</div>
+    <p class="legend photo-legend">Загрузите PDF-файл акта — каждая его страница будет добавлена в конец отчёта отдельным листом, чтобы акт можно было прочитать вместе с остальным отчётом.</p>
+    <div class="pdf-block" id="pdfBlockWrap">
+      <div class="dropzone pdf-dropzone" id="actZone" tabindex="0" role="button" aria-label="Добавить PDF-файл акта выполненных работ">
+        <div class="hint">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 16V4M12 4l-4 4M12 4l4 4"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+          <span>Перетащите PDF сюда или нажмите, чтобы выбрать файл акта.<br>Каждая страница акта попадёт в отчёт отдельным листом.</span>
+        </div>
+        <div class="pdf-file-info" hidden style="display:none;">
+          <svg class="pdf-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 2h9l5 5v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"/><path d="M15 2v5h5"/></svg>
+          <div class="pdf-file-text">
+            <div class="pdf-file-name"></div>
+            <div class="pdf-file-pages"></div>
+          </div>
+        </div>
+        <button type="button" class="clear-btn" hidden aria-label="Удалить файл акта">✕</button>
+        <input type="file" accept="application/pdf" hidden>
+      </div>
+    </div>
+
     <div id="printPhotoPages"></div>
 
     <p class="paper-footer">Отчёт сформирован в PDF из этой формы. Один файл — один объект/ремонт.</p>
@@ -669,6 +717,30 @@
       document.head.appendChild(s);
     });
     return tesseractPromise;
+  }
+
+  // ---- PDF rendering for the "Акт" upload: reads an uploaded PDF client-side
+  // and turns each page into an image so it can be dropped into the print
+  // pipeline like a photo, with no server and no account. ----
+  var pdfjsPromise = null;
+  function loadPdfJs(){
+    if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+    if (pdfjsPromise) return pdfjsPromise;
+    pdfjsPromise = new Promise(function(resolve, reject){
+      var s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.16.105/build/pdf.min.js';
+      s.onload = function(){
+        if (window.pdfjsLib){
+          window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.16.105/build/pdf.worker.min.js';
+          resolve(window.pdfjsLib);
+        } else {
+          reject(new Error('pdfjsLib not found after load'));
+        }
+      };
+      s.onerror = function(){ reject(new Error('pdf.js load failed')); };
+      document.head.appendChild(s);
+    });
+    return pdfjsPromise;
   }
 
   var FIELD_LABELS = [
@@ -939,6 +1011,152 @@
         container.appendChild(page);
       });
     });
+    actPages.forEach(function(pageDataUrl, idx){
+      var page = document.createElement('div');
+      page.className = 'print-photo-page';
+      var cap = document.createElement('div');
+      cap.className = 'print-photo-caption';
+      cap.textContent = 'Акт выполненных работ' + (actPages.length > 1 ? (' — страница ' + (idx + 1) + ' из ' + actPages.length) : '');
+      var img = document.createElement('img');
+      img.src = pageDataUrl;
+      img.alt = '';
+      page.appendChild(cap);
+      page.appendChild(img);
+      container.appendChild(page);
+    });
+  }
+
+  // ---- "Акт" PDF upload: a single PDF, rendered page-by-page into images and
+  // appended to the print flow after the photo pages. ----
+  var actPages = [];
+  var actFileName = '';
+
+  function pluralPages(n){
+    var mod10 = n % 10, mod100 = n % 100;
+    if (mod10 === 1 && mod100 !== 11) return n + ' страница';
+    if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return n + ' страницы';
+    return n + ' страниц';
+  }
+
+  function showActInfo(zone, name, pageCount){
+    var hint = zone.querySelector('.hint');
+    var info = zone.querySelector('.pdf-file-info');
+    var clearBtn = zone.querySelector('.clear-btn');
+    info.querySelector('.pdf-file-name').textContent = name;
+    info.querySelector('.pdf-file-pages').textContent = pluralPages(pageCount);
+    hint.hidden = true;
+    hint.style.display = 'none';
+    info.hidden = false;
+    info.style.display = 'flex';
+    zone.classList.add('has-image');
+    clearBtn.hidden = false;
+  }
+
+  function handleActFile(file, zone){
+    if (!file.type || file.type.indexOf('application/pdf') !== 0){
+      setStatus('Это не PDF-файл — выберите файл в формате PDF.', 5000);
+      return;
+    }
+    setStatus('Обрабатываем PDF-файл акта… это может занять некоторое время.');
+    var reader = new FileReader();
+    reader.onload = function(){
+      var arrayBuffer = reader.result;
+      loadPdfJs().then(function(pdfjsLib){
+        return pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      }).then(function(pdf){
+        var pageImages = [];
+        function renderPage(pageNum){
+          if (pageNum > pdf.numPages){
+            actPages = pageImages;
+            actFileName = file.name || 'Акт.pdf';
+            showActInfo(zone, actFileName, actPages.length);
+            rebuildPrintPages();
+            setStatus('Акт добавлен: ' + pluralPages(actPages.length) + '.', 5000);
+            return;
+          }
+          pdf.getPage(pageNum).then(function(page){
+            var baseViewport = page.getViewport({ scale: 1 });
+            var scale = Math.min(2.2, 1600 / Math.max(baseViewport.width, baseViewport.height));
+            var viewport = page.getViewport({ scale: scale });
+            var canvas = document.createElement('canvas');
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+            var ctx = canvas.getContext('2d');
+            page.render({ canvasContext: ctx, viewport: viewport }).promise.then(function(){
+              pageImages.push(canvas.toDataURL('image/jpeg', 0.9));
+              renderPage(pageNum + 1);
+            }).catch(function(err){
+              console.error(err);
+              setStatus('Ошибка при обработке страницы ' + pageNum + ' акта.', 6000);
+            });
+          });
+        }
+        renderPage(1);
+      }).catch(function(err){
+        console.error(err);
+        setStatus('Не удалось обработать PDF (нет интернета или сбой загрузки). Попробуйте ещё раз.', 8000);
+      });
+    };
+    reader.onerror = function(){
+      setStatus('Не удалось прочитать файл PDF.', 5000);
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  function wireActZone(){
+    var zone = document.getElementById('actZone');
+    if (!zone) return;
+    var input = zone.querySelector('input[type=file]');
+    var clearBtn = zone.querySelector('.clear-btn');
+    var hint = zone.querySelector('.hint');
+    var info = zone.querySelector('.pdf-file-info');
+
+    function openPicker(){
+      if (zone.classList.contains('has-image')) return;
+      input.click();
+    }
+    zone.addEventListener('click', openPicker);
+    zone.addEventListener('keydown', function(e){
+      if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openPicker(); }
+    });
+    ['dragenter','dragover'].forEach(function(ev){
+      zone.addEventListener(ev, function(e){
+        e.preventDefault(); e.stopPropagation();
+        if (!zone.classList.contains('has-image')) zone.classList.add('dragover');
+      });
+    });
+    ['dragleave','dragend'].forEach(function(ev){
+      zone.addEventListener(ev, function(e){ e.preventDefault(); zone.classList.remove('dragover'); });
+    });
+    zone.addEventListener('drop', function(e){
+      e.preventDefault(); e.stopPropagation();
+      zone.classList.remove('dragover');
+      if (zone.classList.contains('has-image')) return;
+      var file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+      if (file) handleActFile(file, zone);
+    });
+    input.addEventListener('change', function(e){
+      var file = e.target.files && e.target.files[0];
+      if (file) handleActFile(file, zone);
+      input.value = '';
+    });
+    clearBtn.addEventListener('click', function(e){
+      e.stopPropagation();
+      resetActZone();
+    });
+
+    function resetActZone(){
+      actPages = [];
+      actFileName = '';
+      zone.classList.remove('has-image');
+      hint.hidden = false;
+      hint.style.display = '';
+      info.hidden = true;
+      info.style.display = 'none';
+      clearBtn.hidden = true;
+      rebuildPrintPages();
+    }
+    zone._resetAct = resetActZone;
   }
 
   function wireGallery(slot){
@@ -981,6 +1199,8 @@
   Array.prototype.forEach.call(document.querySelectorAll('.photo-slot'), wireGallery);
   var screenshotZone = document.getElementById('screenshotZone');
   if (screenshotZone) wireSlot(screenshotZone.closest('.screenshot-block'), true);
+  wireActZone();
+  var actZone = document.getElementById('actZone');
 
   // Global fallback: Ctrl+V anywhere on the page (without a dropzone focused)
   // fills the screenshot slot, so an engineer can just copy a screenshot and paste.
@@ -1021,6 +1241,8 @@
     Array.prototype.forEach.call(document.querySelectorAll('.photo-slot'), function(slot){
       renderGallery(slot, slot.getAttribute('data-cat'));
     });
+
+    if (actZone && actZone._resetAct) actZone._resetAct();
     rebuildPrintPages();
 
     setStatus('Форма очищена', 2500);
