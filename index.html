@@ -160,34 +160,40 @@
     padding-bottom:calc(40px + env(safe-area-inset-bottom,0px));
   }
 
-  /* ---- The "paper": always renders as a light printed page, independent of app theme ---- */
+  /* ---- The "paper": styled to read as a formal printed document, independent of app theme ---- */
   .paper{
     background:#FFFFFF;
     color:#1B2733;
     border-radius:10px;
     box-shadow:var(--shadow);
     overflow:hidden;
-    font-family:"IBM Plex Sans", "Segoe UI", Arial, sans-serif;
+    font-family:"Times New Roman", Times, "PT Serif", Georgia, serif;
   }
   .paper-header{
-    background:linear-gradient(135deg,#1F4E79,#2E75B6);
-    color:#fff;
-    padding:22px 28px 18px;
+    background:#FFFFFF;
+    color:#1B2733;
+    padding:28px 32px 18px;
+    text-align:center;
+    border-bottom:3px double #1B2733;
   }
   .paper-header h1{
-    margin:0 0 4px;
-    font-size:19px;
+    margin:0 0 8px;
+    font-size:21px;
+    font-weight:700;
     letter-spacing:.02em;
+    text-transform:uppercase;
     text-wrap:balance;
+    line-height:1.35;
   }
   .paper-header .subtitle{
     margin:0;
-    font-size:12.5px;
-    opacity:.88;
-    font-weight:400;
+    font-size:13px;
+    font-style:italic;
+    color:#3A4856;
+    opacity:1;
   }
   .legend{
-    margin:14px 28px 0;
+    margin:14px 32px 0;
     padding:10px 12px;
     background:#F4F7FA;
     border:1px solid #E1E8EF;
@@ -196,64 +202,67 @@
     font-style:italic;
     color:#5B6B7A;
     line-height:1.5;
+    font-family:"IBM Plex Sans","Segoe UI",Arial,sans-serif;
   }
   .fields{
-    margin:16px 28px 0;
-    border:1px solid #E1E8EF;
-    border-radius:8px;
+    margin:20px 32px 0;
+    border:1px solid #1B2733;
+    border-radius:0;
     overflow:hidden;
   }
   .field-row{
     display:flex;
-    border-bottom:1px solid #E1E8EF;
+    border-bottom:1px solid #1B2733;
   }
   .field-row:last-child{border-bottom:none;}
   .field-label{
     flex:0 0 42%;
-    padding:9px 12px;
-    font-size:12.5px;
-    font-weight:600;
-    background:#F7F9FB;
-    border-right:1px solid #E1E8EF;
+    padding:9px 14px;
+    font-size:13.5px;
+    font-weight:700;
+    background:#FFFFFF;
+    border-right:1px solid #1B2733;
     display:flex;
     align-items:center;
   }
   .field-value{
     flex:1;
-    padding:9px 12px;
-    font-size:12.5px;
-    background:#FFFDF4;
+    padding:9px 14px;
+    font-size:13.5px;
+    background:#FEFDF9;
     outline:none;
     min-width:0;
     display:flex;
     align-items:center;
-    font-family:"IBM Plex Mono","IBM Plex Sans",monospace;
+    font-family:inherit;
   }
   .field-value:focus{
-    background:#FFF6DC;
-    box-shadow:inset 0 0 0 2px #2E75B6;
+    background:#FAF6E8;
+    box-shadow:inset 0 0 0 2px #1F4E79;
   }
   .field-value:empty::before{
     content:attr(data-placeholder);
     color:#9AA7B4;
     font-style:italic;
-    font-family:"IBM Plex Sans",sans-serif;
+    font-family:inherit;
   }
   .paper.exporting .field-value:empty::before{ content:""; }
 
   .section-title{
-    margin:22px 28px 12px;
-    padding:8px 14px;
-    background:#2E75B6;
-    color:#fff;
-    border-radius:6px;
-    font-size:12.5px;
+    margin:26px 32px 12px;
+    padding:0 0 7px;
+    background:none;
+    color:#1B2733;
+    border-bottom:2px solid #1B2733;
+    border-radius:0;
+    font-size:13.5px;
     font-weight:700;
     letter-spacing:.03em;
     text-transform:uppercase;
+    font-family:"Times New Roman", Times, serif;
   }
   .photos-grid{
-    margin:0 28px 26px;
+    margin:0 32px 26px;
     display:grid;
     grid-template-columns:1fr 1fr;
     gap:16px;
@@ -294,7 +303,7 @@
     object-fit:cover;
     display:block;
   }
-  .screenshot-block{margin:16px 28px 0;}
+  .screenshot-block{margin:16px 32px 0;}
   .dropzone.screenshot-dropzone{
     aspect-ratio:auto;
     min-height:100px;
@@ -389,7 +398,7 @@
   .paper.exporting .clear-btn{display:none;}
 
   .paper-footer{
-    margin:0 28px 22px;
+    margin:0 32px 22px;
     font-size:10.5px;
     color:#9AA7B4;
   }
@@ -440,8 +449,9 @@
       object-fit:contain;
     }
     .print-photo-caption{
-      font-size:13px;
-      font-weight:600;
+      font-family:"Times New Roman", Times, serif;
+      font-size:14px;
+      font-weight:700;
       color:#1B2733;
       margin-bottom:14px;
       text-align:center;
